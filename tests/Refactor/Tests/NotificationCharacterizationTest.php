@@ -72,6 +72,7 @@ class NotificationCharacterizationTest extends TestCase
     {
         $order = $this->orderFactory->getOrderStubForAssociatedProvider();
         $order->method('getProductStatus')->willReturn( OrderStatuses::PENDING_PROVIDER_ERROR);
+
         $sut = new Notification();
         $this->assertEquals(['pedido no confirmado por error de proveedor'], $sut::getMessagesByOrderStatus($order));
     }
@@ -80,6 +81,7 @@ class NotificationCharacterizationTest extends TestCase
     {
         $order = $this->orderFactory->getOrderStubForAssociatedProvider();
         $order->method('getProductStatus')->willReturn( OrderStatuses::ERROR);
+
         $sut = new Notification();
         $this->assertEquals(['pedido no confirmado por error de proveedor'], $sut::getMessagesByOrderStatus($order));
     }
@@ -88,6 +90,7 @@ class NotificationCharacterizationTest extends TestCase
     {
         $order = $this->orderFactory->getOrderStubForAssociatedProvider();
         $order->method('getProductStatus')->willReturn( OrderStatuses::CANCELLED);
+
         $sut = new Notification();
         $this->assertEquals(['pedido cancelado o rechazado'], $sut::getMessagesByOrderStatus($order));
     }
@@ -96,6 +99,7 @@ class NotificationCharacterizationTest extends TestCase
     {
         $order = $this->orderFactory->getOrderStubForAssociatedProvider();
         $order->method('getProductStatus')->willReturn( OrderStatuses::REJECTED);
+
         $sut = new Notification();
         $this->assertEquals(['pedido cancelado o rechazado'], $sut::getMessagesByOrderStatus($order));
     }
@@ -107,6 +111,7 @@ class NotificationCharacterizationTest extends TestCase
         $order = $this->orderFactory->getOrderStubForAssociatedProviderNoStatus();
         $order->method('getProductStatus')->willReturn( OrderStatuses::WAITING_FOR_PAYMENT);
         $order->method('getPaymentMethods')->willReturn($paymentMethods);
+
         $sut = new Notification();
         $this->assertEquals(['pendiente de transferencia'], $sut::getMessagesByOrderStatus($order));
     }
@@ -118,6 +123,7 @@ class NotificationCharacterizationTest extends TestCase
         $order = $this->orderFactory->getOrderStubForAssociatedProviderNoStatus();
         $order->method('getProductStatus')->willReturn( OrderStatuses::WAITING_FOR_PAYMENT);
         $order->method('getPaymentMethods')->willReturn($paymentMethods);
+
         $sut = new Notification();
         $this->assertEquals(['pago a crédito'], $sut::getMessagesByOrderStatus($order));
     }
@@ -140,6 +146,7 @@ class NotificationCharacterizationTest extends TestCase
         $order = $this->orderFactory->getOrderStubForAssociatedProviderNoStatus();
         $order->method('getProductStatus')->willReturn( OrderStatuses::WAITING_FOR_PAYMENT);
         $order->method('getPaymentMethods')->willReturn($paymentMethods);
+
         $sut = new Notification();
         $this->assertEquals(['pago a débito'], $sut::getMessagesByOrderStatus($order));
     }
@@ -151,6 +158,7 @@ class NotificationCharacterizationTest extends TestCase
         $order = $this->orderFactory->getOrderStubForAssociatedProviderNoStatus();
         $order->method('getProductStatus')->willReturn( OrderStatuses::WAITING_FOR_PAYMENT);
         $order->method('getPaymentMethods')->willReturn($paymentMethods);
+
         $sut = new Notification();
         $this->assertEquals(['pago no requiere autorización'], $sut::getMessagesByOrderStatus($order));
     }
@@ -161,6 +169,7 @@ class NotificationCharacterizationTest extends TestCase
         $order = $this->orderFactory->getOrderStubForAssociatedProviderNoStatus();
         $order->method('getProductStatus')->willReturn( OrderStatuses::WAITING_FOR_SHIPMENT);
         $order->method('getPaymentMethods')->willReturn($paymentMethods);
+
         $sut = new Notification();
         $this->assertEquals(['pago confirmado pendiente de envio'], $sut::getMessagesByOrderStatus($order));
     }
@@ -171,6 +180,7 @@ class NotificationCharacterizationTest extends TestCase
         $order = $this->orderFactory->getOrderStubForAssociatedProviderNoStatus();
         $order->method('getProductStatus')->willReturn( OrderStatuses::WAITING_FOR_SHIPMENT);
         $order->method('getPaymentMethods')->willReturn($paymentMethods);
+
         $sut = new Notification();
         $this->assertEquals(['pendiente de cobro'], $sut::getMessagesByOrderStatus($order));
     }
@@ -180,6 +190,7 @@ class NotificationCharacterizationTest extends TestCase
         $order = $this->orderFactory->getOrderStubForAssocProviderPaymentCreditCard();
         $order->method('getStatus')->willReturn(PurchaseStatus::RESERVED);
         $order->method('getResellerCode')->willReturn(Resellers::RESELLER1);
+
         $sut = new Notification();
         $this->assertEquals(['pedido confirmado con reseller 1'], $sut::getMessagesByOrderStatus($order));
     }
@@ -189,6 +200,7 @@ class NotificationCharacterizationTest extends TestCase
         $order = $this->orderFactory->getOrderStubForAssocProviderPaymentCreditCard();
         $order->method('getStatus')->willReturn(PurchaseStatus::SOLD);
         $order->method('getResellerCode')->willReturn(Resellers::RESELLER1);
+
         $sut = new Notification();
         $this->assertEquals(['pedido confirmado con reseller 1'], $sut::getMessagesByOrderStatus($order));
     }
@@ -206,9 +218,9 @@ class NotificationCharacterizationTest extends TestCase
     public function testMessageForSoldInOtherResellers()
     {
         $order = $this->orderFactory->getOrderStubForAssocProviderPaymentCreditCard();
-
         $order->method('getStatus')->willReturn(PurchaseStatus::SOLD);
         $order->method('getResellerCode')->willReturn(Resellers::RESELLER2);
+
         $sut = new Notification();
         $this->assertEquals(['pedido confirmado'], $sut::getMessagesByOrderStatus($order));
     }
@@ -217,6 +229,7 @@ class NotificationCharacterizationTest extends TestCase
     {
         $order = $this->orderFactory->getOrderStubForNotAssociatedProvider();
         $order->method('getProductStatus')->willReturn( OrderStatuses::WAITING_FOR_SHIPMENT);
+
         $sut = new Notification();
         $this->assertEquals(['pendiente de envio'], $sut::getMessagesByOrderStatus($order));
     }
@@ -225,6 +238,7 @@ class NotificationCharacterizationTest extends TestCase
     {
         $order = $this->orderFactory->getOrderStubForNotAssociatedProvider();
         $order->method('getProductStatus')->willReturn( OrderStatuses::CANCELLED);
+
         $sut = new Notification();
         $this->assertEquals(['pedido cancelado'], $sut::getMessagesByOrderStatus($order));
     }
@@ -233,6 +247,7 @@ class NotificationCharacterizationTest extends TestCase
     {
         $order = $this->orderFactory->getOrderStubForNotAssociatedProvider();
         $order->method('getProductStatus')->willReturn( OrderStatuses::PENDING_PROVIDER_ERROR);
+
         $sut = new Notification();
         $this->assertEquals(['pendiente por error en proveedor'], $sut::getMessagesByOrderStatus($order));
     }
@@ -243,6 +258,7 @@ class NotificationCharacterizationTest extends TestCase
         $order = $this->orderFactory->getOrderStubForNotAssociatedProvider();
         $order->method('getStatus')->willReturn(PurchaseStatus::RESERVED);
         $order->method('getResellerCode')->willReturn($reseller);
+
         $sut = new Notification();
         $this->assertEquals(['pedido confirmado'], $sut::getMessagesByOrderStatus($order));
     }
@@ -253,6 +269,7 @@ class NotificationCharacterizationTest extends TestCase
         $order = $this->orderFactory->getOrderStubForNotAssociatedProvider();
         $order->method('getStatus')->willReturn(PurchaseStatus::SOLD);
         $order->method('getResellerCode')->willReturn($reseller);
+
         $sut = new Notification();
         $this->assertEquals(['pedido confirmado'], $sut::getMessagesByOrderStatus($order));
     }
@@ -262,6 +279,7 @@ class NotificationCharacterizationTest extends TestCase
         $order = $this->orderFactory->getOrderStubForNotAssociatedProvider();
         $order->method('getStatus')->willReturn(PurchaseStatus::RESERVED);
         $order->method('getResellerCode')->willReturn(Resellers::RESELLER1);
+
         $sut = new Notification();
         $this->assertEquals(['pedido confirmado reseller 1'], $sut::getMessagesByOrderStatus($order));
     }
@@ -270,6 +288,7 @@ class NotificationCharacterizationTest extends TestCase
         $order = $this->orderFactory->getOrderStubForNotAssociatedProvider();
         $order->method('getStatus')->willReturn(PurchaseStatus::SOLD);
         $order->method('getResellerCode')->willReturn(Resellers::RESELLER1);
+
         $sut = new Notification();
         $this->assertEquals(['pedido confirmado reseller 1'], $sut::getMessagesByOrderStatus($order));
     }
@@ -279,6 +298,7 @@ class NotificationCharacterizationTest extends TestCase
     {
         $order = $this->orderFactory->getOrderStubForNotAssociatedProvider(PaymentTypes::BANK_TRANSFER);
         $order->method('getProductStatus')->willReturn( $orderStatus);
+
         $sut = new Notification();
         $this->assertEquals(['pendiente de transferencia'], $sut::getMessagesByOrderStatus($order));
     }
@@ -288,6 +308,7 @@ class NotificationCharacterizationTest extends TestCase
     {
         $order = $this->orderFactory->getOrderStubForNotAssociatedProvider(PaymentTypes::PAYPAL);
         $order->method('getProductStatus')->willReturn( $orderStatus);
+
         $sut = new Notification();
         $this->assertEquals(['pendiente de paypal'], $sut::getMessagesByOrderStatus($order));
     }
@@ -297,6 +318,7 @@ class NotificationCharacterizationTest extends TestCase
     {
         $order = $this->orderFactory->getOrderStubForNotAssociatedProvider(PaymentTypes::CREDIT_CARD);
         $order->method('getProductStatus')->willReturn( $orderStatus);
+
         $sut = new Notification();
         $this->assertEquals(['pendiente de pago con tarjeta'], $sut::getMessagesByOrderStatus($order));
     }
@@ -306,6 +328,7 @@ class NotificationCharacterizationTest extends TestCase
     {
         $order = $this->orderFactory->getOrderStubForNotAssociatedProvider(PaymentTypes::DEBIT_CARD);
         $order->method('getProductStatus')->willReturn( $orderStatus);
+
         $sut = new Notification();
         $this->assertEquals(['pendiente de pago con tarjeta'], $sut::getMessagesByOrderStatus($order));
     }
@@ -315,6 +338,7 @@ class NotificationCharacterizationTest extends TestCase
     {
         $order = $this->orderFactory->getOrderStubForNotAssociatedProviderWithRequiredAuthorization();
         $order->method('getProductStatus')->willReturn( $orderStatus);
+
         $sut = new Notification();
         $this->assertEquals(['pendiente de autorización'], $sut::getMessagesByOrderStatus($order));
     }
@@ -324,6 +348,7 @@ class NotificationCharacterizationTest extends TestCase
     {
         $order = $this->orderFactory->getOrderStubForNotAssociatedProvider(PaymentTypes::NO_REQUIRED_AUTHORIZATION_PAYMENT);
         $order->method('getProductStatus')->willReturn( $orderStatus);
+
         $sut = new Notification();
         $this->assertEquals(['pendiente de cobro'], $sut::getMessagesByOrderStatus($order));
     }

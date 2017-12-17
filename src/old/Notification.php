@@ -16,7 +16,6 @@ class Notification
         $productStatus = (int) $order->getProductStatus();
         $orderStatus = (int) $order->getStatus();
         $providerLocator = $order->getProviderLocator();
-        $lines = [];
         $paymentMethod = null;
 
         try {
@@ -24,7 +23,6 @@ class Notification
             $selectedPaymentMethod = $paymentMethods->getSelectedPaymentMethod();
             if ($selectedPaymentMethod == null) {
                 $logger = Logger::getInstance();
-                $purchaseId = $order->getPurchaseId();
                 $orderId = $order->getId();
                 $logger->debug("Medio de pago desconocido");
                 if ($order->getDestinationCountry() == Country::FRANCE && $orderId < 745) {
@@ -37,102 +35,108 @@ class Notification
         }
 
         if (Providers::isProvider1($order->getProvider())) {
-            if ($productStatus == OrderStatuses::PENDING_PROVIDER_ERROR||
-                $productStatus == OrderStatuses::PENDING
+            if ($productStatus == OrderStatuses::PENDING_PROVIDER_ERROR || $productStatus == OrderStatuses::PENDING
             ) {
-                $lines[] = 'pedido no confirmado con provider 1';
-            } elseif ($productStatus == OrderStatuses::CANCELLED) {
-                $lines[] = 'pedido cancelado';
+                return ['pedido no confirmado con provider 1'];
             }
-        } elseif (empty($providerLocator)) {
-            $lines[] = 'pedido no se pudo realizar';
-        } else {
-            if (Providers::isAssociatedProvider($order->getProvider())) {
-                $paymentMethods = PaymentMethods::getFromOrder($order);
-
-                if ($productStatus == OrderStatuses::PROVIDER_PENDING ||
-                    $productStatus == OrderStatuses::PENDING ||
-                    $productStatus == OrderStatuses::WAITING_FOR_PAYMENT
-                ) {
-                    if ($paymentMethod == PaymentTypes::BANK_TRANSFER) {
-                        $lines[] = 'pendiente de transferencia';
-                    } else {
-                        if ($paymentMethod == PaymentTypes::PAYPAL ||
-                            $paymentMethod == PaymentTypes::CREDIT_CARD) {
-                            $lines[] = 'pago a crédito';
-                        } else {
-                            if ($paymentMethods->hasSelectedDebitCard()) {
-                                $lines[] = 'pago a débito';
-                            } elseif (!$paymentMethods->requiresAuthorization()) {
-                                $lines[] = 'pago no requiere autorización';
-                            }
-                        }
-                    }
-                } elseif ($productStatus == OrderStatuses::WAITING_FOR_SHIPMENT) {
-                    if ($paymentMethods->hasSelectedDebitCard()) {
-                        $lines[] = 'pago confirmado pendiente de envio';
-                    } else {
-                        $lines[] = 'pendiente de cobro';
-                    }
-                } elseif ($productStatus == OrderStatuses::PENDING_PROVIDER_ERROR ||
-                    $productStatus == OrderStatuses::ERROR
-                ) {
-                    $lines[] = 'pedido no confirmado por error de proveedor';
-                } elseif ($orderStatus == PurchaseStatus::RESERVED ||
-                    $orderStatus == PurchaseStatus::SOLD
-                ) {
-                    if ($order->getResellerCode() == Resellers::RESELLER1) {
-                        $lines[] = 'pedido confirmado con reseller 1';
-                    } else {
-                        $lines[] = 'pedido confirmado';
-                    }
-                } elseif ($productStatus == OrderStatuses::CANCELLED ||
-                    $productStatus == OrderStatuses::REJECTED
-                ) {
-                    $lines[] = 'pedido cancelado o rechazado';
-                }
-            }
-            else {
-                if ($productStatus == OrderStatuses::PROVIDER_PENDING ||
-                    $productStatus == OrderStatuses::PENDING) {
-                    if ($paymentMethod == PaymentTypes::BANK_TRANSFER) {
-                        $lines[] = 'pendiente de transferencia';
-                    } elseif ($paymentMethod == PaymentTypes::PAYPAL) {
-                        $lines[] = 'pendiente de paypal';
-                    } elseif ($paymentMethod == PaymentTypes::CREDIT_CARD ||
-                        $paymentMethod == PaymentTypes::DEBIT_CARD) {
-                        $lines[] = 'pendiente de pago con tarjeta';
-                    } else {
-                        $paymentMethods = PaymentMethods::getFromOrder($order);
-                        if ($paymentMethods->requiresAuthorization()) {
-                            $lines[] = 'pendiente de autorización';
-                        } else {
-                            $lines[] = 'pendiente de cobro';
-                        }
-                    }
-                } elseif ($productStatus == OrderStatuses::WAITING_FOR_SHIPMENT) {
-                    $lines[] = 'pendiente de envio';
-                } elseif ($productStatus == OrderStatuses::CANCELLED) {
-                    $lines[] = 'pedido cancelado';
-                } elseif ($productStatus == OrderStatuses::PENDING_PROVIDER_ERROR) {
-                    $lines[] = 'pendiente por error en proveedor';
-                } elseif ($orderStatus == PurchaseStatus::RESERVED ||
-                    $orderStatus == PurchaseStatus::SOLD
-                ) {
-                    if ($order->getResellerCode() == Resellers::RESELLER2 ||
-                        $order->getResellerCode() == Resellers::RESELLER3 ||
-                        $order->getResellerCode() == Resellers::RESELLER4 ||
-                        $order->getResellerCode() == Resellers::RESELLER5
-                    ) {
-                        $lines[] = 'pedido confirmado';
-                    } else {
-                        $lines[] = 'pedido confirmado reseller 1';
-                    }
-                }
+            if ($productStatus == OrderStatuses::CANCELLED) {
+                return ['pedido cancelado'];
             }
         }
 
-        return $lines;
-    }
+        if (empty($providerLocator)) {
+            return ['pedido no se pudo realizar'];
+        }
 
+        if (Providers::isAssociatedProvider($order->getProvider())) {
+
+            if ($productStatus == OrderStatuses::PROVIDER_PENDING ||
+                $productStatus == OrderStatuses::PENDING ||
+                $productStatus == OrderStatuses::WAITING_FOR_PAYMENT
+            ) {
+                if ($paymentMethod == PaymentTypes::BANK_TRANSFER) {
+                    return ['pendiente de transferencia'];
+                }
+                if ($paymentMethod == PaymentTypes::PAYPAL || $paymentMethod == PaymentTypes::CREDIT_CARD) {
+                    return ['pago a crédito'];
+                }
+                if ($paymentMethods->hasSelectedDebitCard()) {
+                    return ['pago a débito'];
+                }
+                if (!$paymentMethods->requiresAuthorization()) {
+                    return ['pago no requiere autorización'];
+                }
+            }
+
+            if ($productStatus == OrderStatuses::WAITING_FOR_SHIPMENT) {
+                if ($paymentMethods->hasSelectedDebitCard()) {
+                    return ['pago confirmado pendiente de envio'];
+                }
+
+                return ['pendiente de cobro'];
+            }
+
+            if ($productStatus == OrderStatuses::PENDING_PROVIDER_ERROR || $productStatus == OrderStatuses::ERROR
+            ) {
+                return ['pedido no confirmado por error de proveedor'];
+            }
+
+            if ($orderStatus == PurchaseStatus::RESERVED || $orderStatus == PurchaseStatus::SOLD) {
+                if ($order->getResellerCode() == Resellers::RESELLER1) {
+                    return ['pedido confirmado con reseller 1'];
+                }
+
+                return ['pedido confirmado'];
+            }
+
+            if ($productStatus == OrderStatuses::CANCELLED || $productStatus == OrderStatuses::REJECTED
+            ) {
+                return ['pedido cancelado o rechazado'];
+            }
+        }
+        if ($productStatus == OrderStatuses::PROVIDER_PENDING || $productStatus == OrderStatuses::PENDING) {
+            if ($paymentMethod == PaymentTypes::BANK_TRANSFER) {
+                return ['pendiente de transferencia'];
+            }
+
+            if ($paymentMethod == PaymentTypes::PAYPAL) {
+                return ['pendiente de paypal'];
+            }
+
+            if ($paymentMethod == PaymentTypes::CREDIT_CARD || $paymentMethod == PaymentTypes::DEBIT_CARD) {
+                return ['pendiente de pago con tarjeta'];
+            }
+            if ($paymentMethods->requiresAuthorization()) {
+                return ['pendiente de autorización'];
+            }
+
+            return ['pendiente de cobro'];
+        }
+        if ($productStatus == OrderStatuses::WAITING_FOR_SHIPMENT) {
+            return ['pendiente de envio'];
+        }
+
+        if ($productStatus == OrderStatuses::CANCELLED) {
+            return ['pedido cancelado'];
+        }
+
+        if ($productStatus == OrderStatuses::PENDING_PROVIDER_ERROR) {
+            return ['pendiente por error en proveedor'];
+        }
+
+        if ($orderStatus == PurchaseStatus::RESERVED || $orderStatus == PurchaseStatus::SOLD
+        ) {
+            if ($order->getResellerCode() == Resellers::RESELLER2 ||
+                $order->getResellerCode() == Resellers::RESELLER3 ||
+                $order->getResellerCode() == Resellers::RESELLER4 ||
+                $order->getResellerCode() == Resellers::RESELLER5
+            ) {
+                return ['pedido confirmado'];
+            }
+
+            return ['pedido confirmado reseller 1'];
+        }
+
+        return [];
+    }
 }
