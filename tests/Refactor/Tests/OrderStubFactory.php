@@ -19,7 +19,7 @@ use Providers;
 class OrderStubFactory extends TestCase
 {
     private $paymentMethodsFactory;
-    
+
     public function getOrderStubForAssociatedProviderNoStatus() : MockObject
     {
         $order = $this->createMock(Order::class);
@@ -51,7 +51,7 @@ class OrderStubFactory extends TestCase
         return $order;
     }
 
-    public function buildOrderStubForAssociatedProvider() : MockObject
+    public function getOrderStubForAssociatedProvider() : MockObject
     {
         $order = $this->createMock(Order::class);
         $order->method('getProviderLocator')->willReturn('locator');
@@ -61,6 +61,38 @@ class OrderStubFactory extends TestCase
 
         return $order;
     }
+
+    public function getOrderStubForNotAssociatedProvider($paymentMethod = null):MockObject
+    {
+        if ($paymentMethod) {
+            $paymentMethods = $this->paymentMethodsFactory->getPaymentMethods($paymentMethod);
+        } else {
+            $paymentMethods = new PaymentMethods();
+        }
+
+        $order = $this->createMock(Order::class);
+        $order->method('getProviderLocator')->willReturn('locator');
+        $order->method('getPaymentMethods')->willReturn($paymentMethods);
+        $order->method('getId')->willReturn('123');
+        $order->method('getProvider')->willReturn(Providers::PROVIDER2);
+
+        return $order;
+    }
+
+
+    public function getOrderStubForNotAssociatedProviderWithRequiredAuthorization():MockObject
+    {
+        $paymentMethods = $this->paymentMethodsFactory->getMethodWithRequiredAuthorization();
+
+        $order = $this->createMock(Order::class);
+        $order->method('getProviderLocator')->willReturn('locator');
+        $order->method('getPaymentMethods')->willReturn($paymentMethods);
+        $order->method('getId')->willReturn('123');
+        $order->method('getProvider')->willReturn(Providers::PROVIDER2);
+
+        return $order;
+    }
+
 
     /**
      * @param mixed $paymentMethodsFactory

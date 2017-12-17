@@ -9,7 +9,7 @@
 class PaymentMethods
 {
 
-    public static function getFromOrder(Order $order) : PaymentMethods
+    public static function getFromOrder(Order $order)
     {
         return $order->getPaymentMethods();
     }
@@ -23,10 +23,6 @@ class PaymentMethods
     }
 
     public function hasSelectedDebitCard()
-    {
-    }
-
-    public function hasPayuEfectivoSeleccionado()
     {
     }
 }

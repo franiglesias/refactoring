@@ -29,7 +29,7 @@ class PaymentMethodsStubFactory extends TestCase
 
     public function getMethodWithRequiredAuthorization() : MockObject
     {
-        return $this->configurePaymentMethods(PaymentTypes::AUTHORIZED_PAYMENT, false, true);
+        return $this->configurePaymentMethods(PaymentTypes::REQUIRED_AUTHORIZATION_PAYMENT, false, true);
     }
 
     protected function configurePaymentMethods(

@@ -14,4 +14,6 @@ class PaymentTypes
     public const CREDIT_CARD = 3;
     public const DEBIT_CARD = 4;
     public const AUTHORIZED_PAYMENT = 5;
+    public const NO_REQUIRED_AUTHORIZATION_PAYMENT = 6;
+    public const REQUIRED_AUTHORIZATION_PAYMENT = 7;
 }
