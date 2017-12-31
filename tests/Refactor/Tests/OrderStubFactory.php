@@ -42,9 +42,10 @@ class OrderStubFactory extends TestCase
 
     public function getOrderStubForProvider1() : MockObject
     {
+        $paymentMethods = $this->paymentMethodsFactory->getPaymentMethods(PaymentTypes::CREDIT_CARD);
         $order = $this->createMock(Order::class);
         $order->method('getProviderLocator')->willReturn('locator');
-        $order->method('getPaymentMethods')->willReturn(new PaymentMethods());
+        $order->method('getPaymentMethods')->willReturn($paymentMethods);
         $order->method('getId')->willReturn('123');
         $order->method('getProvider')->willReturn(Providers::PROVIDER1);
 
@@ -53,9 +54,10 @@ class OrderStubFactory extends TestCase
 
     public function getOrderStubForAssociatedProvider() : MockObject
     {
+        $paymentMethods = $this->paymentMethodsFactory->getPaymentMethods(PaymentTypes::CREDIT_CARD);
         $order = $this->createMock(Order::class);
         $order->method('getProviderLocator')->willReturn('locator');
-        $order->method('getPaymentMethods')->willReturn(new PaymentMethods());
+        $order->method('getPaymentMethods')->willReturn($paymentMethods);
         $order->method('getId')->willReturn('123');
         $order->method('getProvider')->willReturn(Providers::PROVIDER3);
 
@@ -67,7 +69,7 @@ class OrderStubFactory extends TestCase
         if ($paymentMethod) {
             $paymentMethods = $this->paymentMethodsFactory->getPaymentMethods($paymentMethod);
         } else {
-            $paymentMethods = new PaymentMethods();
+            $paymentMethods = $this->paymentMethodsFactory->getPaymentMethods(PaymentTypes::CREDIT_CARD);
         }
 
         $order = $this->createMock(Order::class);

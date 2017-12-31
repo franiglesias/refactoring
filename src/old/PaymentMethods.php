@@ -25,4 +25,16 @@ class PaymentMethods
     public function hasSelectedDebitCard()
     {
     }
+
+    public function getPaymentMethodFromOrder(Order $order)
+    {
+        $selectedPaymentMethod = $this->getSelectedPaymentMethod();
+        if ($selectedPaymentMethod !== null) {
+            return $selectedPaymentMethod->getPaymentMethodType()->getIdTipoMedioDePago();
+        }
+        if ($order->getDestinationCountry() == Country::FRANCE && $order->getId() < 745) {
+            return PaymentTypes::PAYPAL;
+        }
+        return null;
+    }
 }

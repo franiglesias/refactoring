@@ -37,18 +37,11 @@ class PaymentMethodsStubFactory extends TestCase
         bool $isDebitCard = false,
         bool $requiresAuth = false) : MockObject
     {
-        $paymentMethodType = $this->createMock(PaymentMethodType::class);
-        $paymentMethodType->method('getIdTipoMedioDePago')->willReturn($selectedMethod);
-
-        $paymentMethod = $this->createMock(PaymentMethod::class);
-        $paymentMethod->method('getPaymentMethodType')->willReturn($paymentMethodType);
-
         $paymentMethods = $this->createMock(PaymentMethods::class);
         $paymentMethods->method('getFromOrder')->willReturn($paymentMethods);
-        $paymentMethods->method('getSelectedPaymentMethod')->willReturn($paymentMethod);
         $paymentMethods->method('hasSelectedDebitCard')->willReturn($isDebitCard);
         $paymentMethods->method('requiresAuthorization')->willReturn($requiresAuth);
-
+        $paymentMethods->method('getPaymentMethodFromOrder')->willReturn($selectedMethod);
         return $paymentMethods;
     }
 }

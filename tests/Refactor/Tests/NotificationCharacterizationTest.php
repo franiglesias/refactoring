@@ -8,12 +8,14 @@
 
 namespace Refactor\Tests;
 
+use Exception;
 use Notification;
 use Order;
 use OrderStatuses;
 use PaymentMethods;
 use PaymentTypes;
 use PHPUnit\Framework\TestCase;
+use Providers;
 use PurchaseStatus;
 use Resellers;
 
@@ -45,7 +47,6 @@ class NotificationCharacterizationTest extends TestCase
     {
         $order = $this->orderFactory->getOrderStubForProvider1();
         $order->method('getProductStatus')->willReturn(OrderStatuses::CANCELLED);
-
         $sut = new Notification();
         $this->assertEquals(['pedido cancelado'], $sut::getMessagesByOrderStatus($order));
     }
@@ -281,7 +282,7 @@ class NotificationCharacterizationTest extends TestCase
         $order->method('getResellerCode')->willReturn(Resellers::RESELLER1);
 
         $sut = new Notification();
-        $this->assertEquals(['pedido confirmado reseller 1'], $sut::getMessagesByOrderStatus($order));
+        $this->assertEquals(['pedido confirmado con reseller 1'], $sut::getMessagesByOrderStatus($order));
     }
     public function testMessageNotAssociatedProviderSoldReseller1()
     {
@@ -290,7 +291,7 @@ class NotificationCharacterizationTest extends TestCase
         $order->method('getResellerCode')->willReturn(Resellers::RESELLER1);
 
         $sut = new Notification();
-        $this->assertEquals(['pedido confirmado reseller 1'], $sut::getMessagesByOrderStatus($order));
+        $this->assertEquals(['pedido confirmado con reseller 1'], $sut::getMessagesByOrderStatus($order));
     }
 
     /** @dataProvider orderStatusPendingNotAssociatedProvider */
@@ -351,6 +352,30 @@ class NotificationCharacterizationTest extends TestCase
 
         $sut = new Notification();
         $this->assertEquals(['pendiente de cobro'], $sut::getMessagesByOrderStatus($order));
+    }
+
+    public function testPaymentMethodsThrowsException()
+    {
+        $order = $this->createMock(Order::class);
+        $order->method('getProviderLocator')->willReturn('locator');
+        $order->method('getId')->willReturn('123');
+        $order->method('getProvider')->willReturn(Providers::PROVIDER2);
+        $order->method('getPaymentMethods')->willThrowException(new Exception());
+
+        $sut = new Notification();
+        $this->assertEquals([], $sut->getMessagesByOrderStatus($order));
+    }
+
+    public function testMessageForEmptyProviderLocatorWithProvider1()
+    {
+        $order = $this->createMock(Order::class);
+        $order->method('getProviderLocator')->willReturn('');
+        $order->method('getPaymentMethods')->willReturn(new PaymentMethods());
+        $order->method('getId')->willReturn('123');
+        $order->method('getProvider')->willReturn(Providers::PROVIDER1);
+
+        $sut = new Notification();
+        $this->assertEquals(['pedido no se pudo realizar'], $sut::getMessagesByOrderStatus($order));
     }
 
     public function orderStatusPendingProvider()
