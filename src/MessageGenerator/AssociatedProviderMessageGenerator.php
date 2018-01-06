@@ -1,34 +1,26 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: frankie
- * Date: 31/12/17
- * Time: 21:11
- */
 
-namespace Refactor;
+namespace Refactor\MessageGenerator;
 
 
-use Order;
 use OrderStatuses;
-use PaymentMethods;
 use PaymentTypes;
+use Refactor\ReportableOrder;
 
 class AssociatedProviderMessageGenerator implements MessageGenerator
 {
-    public function generate(Order $order, PaymentMethods $paymentMethods)
+    public function generate(ReportableOrder $reportableOrder)
     {
-        $productStatus = $order->getProductStatus();
-
-        switch ($productStatus) {
+        switch ($reportableOrder->getProductStatus()) {
             case OrderStatuses::PROVIDER_PENDING:
             case OrderStatuses::PENDING:
             case OrderStatuses::WAITING_FOR_PAYMENT:
-                return $this->generateMessageForPaymentMethod($order, $paymentMethods);
+                return $this->generateMessageForPaymentMethod($reportableOrder);
             case OrderStatuses::WAITING_FOR_SHIPMENT:
-                if ($paymentMethods->hasSelectedDebitCard()) {
+                if ($reportableOrder->getPaymentMethod() == PaymentTypes::DEBIT_CARD) {
                     return ['pago confirmado pendiente de envio'];
                 }
+
                 return ['pendiente de cobro'];
             case OrderStatuses::PENDING_PROVIDER_ERROR:
             case OrderStatuses::ERROR:
@@ -36,15 +28,12 @@ class AssociatedProviderMessageGenerator implements MessageGenerator
             case OrderStatuses::CANCELLED:
             case OrderStatuses::REJECTED:
                 return ['pedido cancelado o rechazado'];
-            default:
-                return [];
         }
     }
 
-    private function generateMessageForPaymentMethod(Order $order, PaymentMethods $paymentMethods) : array
+    private function generateMessageForPaymentMethod(ReportableOrder $reportableOrder) : array
     {
-        $paymentMethod = $paymentMethods->getPaymentMethodFromOrder($order);
-        switch ($paymentMethod) {
+        switch ($reportableOrder->getPaymentMethod()) {
             case PaymentTypes::BANK_TRANSFER:
                 return ['pendiente de transferencia'];
             case PaymentTypes::PAYPAL:
@@ -53,10 +42,9 @@ class AssociatedProviderMessageGenerator implements MessageGenerator
             case PaymentTypes::DEBIT_CARD:
                 return ['pago a débito'];
             default:
-                if (!$paymentMethods->requiresAuthorization()) {
+                if (!$reportableOrder->paymentMethodRequiresAuthorization()) {
                     return ['pago no requiere autorización'];
                 }
-                return [];
         }
     }
 

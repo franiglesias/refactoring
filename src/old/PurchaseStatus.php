@@ -11,4 +11,6 @@ class PurchaseStatus
 
     const RESERVED = 1;
     const SOLD = 2;
+    const INCOMPLETE = 3;
+    const ERROR = 4;
 }

@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: frankie
- * Date: 17/12/17
- * Time: 12:49
- */
 
 namespace Refactor\Tests;
 

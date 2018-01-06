@@ -1,46 +1,35 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: frankie
- * Date: 31/12/17
- * Time: 21:16
- */
 
-namespace Refactor;
+namespace Refactor\MessageGenerator;
 
 
-use Order;
 use OrderStatuses;
-use PaymentMethods;
 use PaymentTypes;
+use Refactor\ReportableOrder;
 
 class NoAssociatedProviderMessageGenerator implements MessageGenerator
 {
-    public function generate(Order $order, PaymentMethods $paymentMethods)
+    public function generate(ReportableOrder $reportableOrder)
     {
-        $productStatus = $order->getProductStatus();
-        switch ($productStatus) {
+        switch ($reportableOrder->getProductStatus()) {
             case OrderStatuses::PROVIDER_PENDING:
             case OrderStatuses::PENDING:
-                return $this->generateMessageForPaymentMethod($order, $paymentMethods);
+                return $this->generateMessageForPaymentMethod($reportableOrder);
             case OrderStatuses::WAITING_FOR_SHIPMENT:
                 return ['pendiente de envio'];
             case OrderStatuses::CANCELLED:
                 return ['pedido cancelado'];
             case OrderStatuses::PENDING_PROVIDER_ERROR:
                 return ['pendiente por error en proveedor'];
-            default:
-                return [];
         }
     }
 
-    private function generateMessageForPaymentMethod(Order $order, PaymentMethods $paymentMethods) : array
+    private function generateMessageForPaymentMethod(ReportableOrder $reportableOrder) : array
     {
-        if ($paymentMethods->requiresAuthorization()) {
+        if ($reportableOrder->paymentMethodRequiresAuthorization()) {
             return ['pendiente de autorización'];
         }
-        $paymentMethod = $paymentMethods->getPaymentMethodFromOrder($order);
-        switch ($paymentMethod) {
+        switch ($reportableOrder->getPaymentMethod()) {
             case PaymentTypes::BANK_TRANSFER:
                 return ['pendiente de transferencia'];
             case PaymentTypes::PAYPAL:

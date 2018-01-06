@@ -9,7 +9,7 @@
 class PaymentMethods
 {
 
-    public static function getFromOrder(Order $order)
+    public static function getFromOrder(Order $order) : PaymentMethods
     {
         return $order->getPaymentMethods();
     }
